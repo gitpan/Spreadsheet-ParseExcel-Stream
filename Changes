@@ -1,0 +1,5 @@
+Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
+
+0.01  Wed Jul 27 19:03:17 2011
+  - original version; created by h2xs with options
+    -n Spreadsheet::ParseExcel::Stream -X -A
