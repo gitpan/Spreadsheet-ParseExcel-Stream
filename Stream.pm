@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
   my ($class, $file) = @_;
@@ -92,13 +92,14 @@ sub next_row {
   my $f = $self->{SUB};
 
   # Initialize row with first cell
-  my @row = ($curr_cell);
+  my @row = ();
+  $row[ $curr_cell->[3] ] = $curr_cell;
   my $nxt_cell = $f->();
 
   # Collect current row on current worksheet
   while ( $nxt_cell && $nxt_cell->[1] == $curr_cell->[1] && $nxt_cell->[2] == $curr_cell->[2] ) {
     $curr_cell = $nxt_cell;
-    push @row, $curr_cell;
+    $row[ $curr_cell->[3] ] = $curr_cell;
     $nxt_cell = $f->();
   }
   $self->{NEXT_CELL} = $nxt_cell;
@@ -112,7 +113,7 @@ sub row {
     my $row = $self->next_row();
     return unless $row;
   }
-  return [ map { $_->[4]->value() } @{$self->{CURR_ROW}} ];
+  return [ map { defined $_ ? $_->[4]->value() : $_ } @{$self->{CURR_ROW}} ];
 }
 
 sub row_unformatted {
@@ -121,7 +122,7 @@ sub row_unformatted {
     my $row = $self->next_row();
     return unless $row;
   }
-  return [ map { $_->[4]->unformatted() } @{$self->{CURR_ROW}} ];
+  return [ map { defined $_ ? $_->[4]->unformatted() : $_ } @{$self->{CURR_ROW}} ];
 }
 
 1;

@@ -3,6 +3,9 @@ Makefile.PL
 MANIFEST
 README
 t/00-base.t
+t/01-nulls.t
 t/test.xls
+t/test_nulls.xls
 Stream.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
