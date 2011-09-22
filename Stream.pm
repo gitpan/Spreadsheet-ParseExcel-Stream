@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
   my ($class, $file) = @_;

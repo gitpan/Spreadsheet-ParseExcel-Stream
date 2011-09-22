@@ -7,14 +7,12 @@ my $xls = Spreadsheet::ParseExcel::Stream->new("t/test_nulls.xls");
 ok($xls, 'Created xls object');
 
 my %data;
-open(my $fh, ">", "t.out") or die "ERRG: $!";
 while ( my $sheet = $xls->sheet() ) {
   my $name = $sheet->name();
   while ( my $row = $sheet->row() ) {
     push @{$data{$name}}, [ @$row ];
   }
 }
-close $fh;
 
 ok(%data, 'Got data');
 

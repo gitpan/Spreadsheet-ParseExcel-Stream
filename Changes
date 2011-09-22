@@ -1,5 +1,7 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.03  Thu Sep 22 19:23:22 2011
+  - Remove debug code in test.
 0.02  Thu Sep 22 18:23:22 2011
   - Fixed misalignment of empty columns
     Reported and patch supplied by SHYOKOU
