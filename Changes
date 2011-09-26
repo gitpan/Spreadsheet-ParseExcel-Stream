@@ -1,9 +1,12 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.04  Mon Sep 26 16:22:42 2011
+  - Implement TrimEmpty option.
+    Added tests.
 0.03  Thu Sep 22 19:23:22 2011
   - Remove debug code in test.
 0.02  Thu Sep 22 18:23:22 2011
-  - Fixed misalignment of empty columns
+  - Fixed misalignment of empty columns (RT #71138)
     Reported and patch supplied by SHYOKOU
   - Added test of empty columns.
 0.01  Wed Jul 27 19:03:17 2011

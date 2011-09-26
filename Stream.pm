@@ -7,11 +7,12 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
-  my ($class, $file) = @_;
+  my ($class, $file, $opts) = @_;
 
+  $opts ||= {};
   my $main = Coro::State->new();
   my ($xls,$parser);
 
@@ -58,6 +59,7 @@ sub new {
     PARSER => $tmp_p,
     NEXT_CELL => $nxt_cell,
     SUB      => $generator,
+    TRIM     => $opts->{TrimEmpty},
   }, $class . '::Sheet';
 }
 
@@ -93,13 +95,17 @@ sub next_row {
 
   # Initialize row with first cell
   my @row = ();
-  $row[ $curr_cell->[3] ] = $curr_cell;
   my $nxt_cell = $f->();
+
+  my $min_col = $self->{TRIM}
+    ? ( $curr_cell->[0]->worksheet( $curr_cell->[1] )->col_range)[0]
+    : 0;
+  $row[ $curr_cell->[3] - $min_col ] = $curr_cell;
 
   # Collect current row on current worksheet
   while ( $nxt_cell && $nxt_cell->[1] == $curr_cell->[1] && $nxt_cell->[2] == $curr_cell->[2] ) {
     $curr_cell = $nxt_cell;
-    $row[ $curr_cell->[3] ] = $curr_cell;
+    $row[ $curr_cell->[3] - $min_col ] = $curr_cell;
     $nxt_cell = $f->();
   }
   $self->{NEXT_CELL} = $nxt_cell;
@@ -135,7 +141,7 @@ Spreadsheet::ParseExcel::Stream - Simple interface to Excel data with no memory 
 
 =head1 SYNOPSIS
 
-  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file);
+  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file, \%options);
   while ( my $sheet = $xls->sheet() ) {
     while ( my $row = $sheet->row ) {
       my @data = @$row;
@@ -152,9 +158,21 @@ docs to reduce memory usage, and returns the data row by row and sheet by sheet.
 
 =head2 new
 
-  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file);
+  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file, \%options);
 
 Opens the spreadsheet and returns an object to iterate through the data.
+
+Accepts an optional hashref with the following keys:
+
+=over
+
+=item TrimEmpty
+
+If true, trims leading empty columns. Trims however many empty columns that the row with the minimum number
+of empty columns has. E.g. if row 1 has data in columns B, C, and D, and row 2 has data in C, D, and E, then
+row 1 will shift to A, B, and C, and row 2 will shift to B, C, and D.
+
+=back
 
 =head2 sheet
 
