@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -213,6 +213,13 @@ Returns the worksheet containing the next cell of data as a Spreadsheet::ParseEx
 =head1 AUTHOR
 
 Douglas Wilson, E<lt>dougw@cpan.org<gt>
+
+=head1 BUGS AND LIMITATIONS
+
+For spreadsheets created with L<Spreadsheet::WriteExcel> without using
+C<$wb-E<gt>compatibility_mode()>, this module will read rows of a spreadsheet
+out of order if the rows were written out of order, and the TrimEmpty option of 
+this module will not work correctly.
 
 =head1 COPYRIGHT AND LICENSE
 

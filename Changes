@@ -1,5 +1,7 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.05  Tue Sep 27 17:12:42 2011
+  - Add bugs/limitations to pod.
 0.04  Mon Sep 26 16:22:42 2011
   - Implement TrimEmpty option.
     Added tests.
