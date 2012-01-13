@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -83,7 +83,7 @@ sub name {
   return $self->worksheet()->{Name};
 }
 
-sub next_row {
+sub set_next_row {
   my ($self, $current) = @_;
   return $self->{CURR_ROW} if $current;
 
@@ -110,25 +110,27 @@ sub next_row {
   }
   $self->{NEXT_CELL} = $nxt_cell;
   $self->{NEW_WS}++ if !$nxt_cell || $orig_cell->[1] != $nxt_cell->[1];
-  return $self->{CURR_ROW} = \@row;
+  $self->{CURR_ROW} = \@row;
+}
+
+sub next_row {
+  my ($self, $current, $f) = @_;
+  $f ||= sub {$_->[4]};
+  unless ($current) {
+    my $row = $self->set_next_row();
+    return unless $row;
+  }
+  return [ map { defined $_ ? $f->() : $_ } @{$self->{CURR_ROW}} ];
 }
 
 sub row {
-  my ($self, $current) = @_;
-  unless ($current) {
-    my $row = $self->next_row();
-    return unless $row;
-  }
-  return [ map { defined $_ ? $_->[4]->value() : $_ } @{$self->{CURR_ROW}} ];
+  my ($self,$current) = @_;
+  return $self->next_row($current, sub {$_->[4]->value});
 }
 
-sub row_unformatted {
+sub unformatted {
   my ($self, $current) = @_;
-  unless ($current) {
-    my $row = $self->next_row();
-    return unless $row;
-  }
-  return [ map { defined $_ ? $_->[4]->unformatted() : $_ } @{$self->{CURR_ROW}} ];
+  return $self->next_row($current, sub {$_->[4]->unformatted});
 }
 
 1;

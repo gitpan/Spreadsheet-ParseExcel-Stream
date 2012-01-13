@@ -1,5 +1,8 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.06  Thu Jan 12 17:57:14 2012
+  - Fix next_row and unformatted methods.
+  - Add tests.
 0.05  Tue Sep 27 17:12:42 2011
   - Add bugs/limitations to pod.
 0.04  Mon Sep 26 16:22:42 2011

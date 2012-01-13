@@ -6,6 +6,8 @@ t/00-base.t
 t/01-nulls.t
 t/02-trim.t
 t/03-trim_more.t
+t/04-unformatted.t
+t/05-cell_objects.t
 t/test.xls
 t/test_nulls.xls
 t/test_trim.xls
