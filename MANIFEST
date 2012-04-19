@@ -8,6 +8,7 @@ t/02-trim.t
 t/03-trim_more.t
 t/04-unformatted.t
 t/05-cell_objects.t
+t/06-bind.t
 t/test.xls
 t/test_nulls.xls
 t/test_trim.xls

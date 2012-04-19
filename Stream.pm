@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -53,7 +53,7 @@ sub new {
   };
   my $nxt_cell = $generator->();
 
-  bless {
+  my $self = bless {
     # Save a reference to the parser so it doesn't disappear
     # until the object is destroyed.
     PARSER => $tmp_p,
@@ -61,6 +61,8 @@ sub new {
     SUB      => $generator,
     TRIM     => $opts->{TrimEmpty},
   }, $class . '::Sheet';
+  $self->bind_columns( @{$opts->{BindColumns}} ) if $opts->{BindColumns};
+  return $self;
 }
 
 package Spreadsheet::ParseExcel::Stream::Sheet;
@@ -119,6 +121,11 @@ sub next_row {
   unless ($current) {
     my $row = $self->set_next_row();
     return unless $row;
+    if ( $self->{BIND} ) {
+      my @curr_row = map { defined $_ ? $f->() : $_ } @{$self->{CURR_ROW}};
+      $$_ = shift @curr_row for @{$self->{BIND}};
+      return 1;
+    }
   }
   return [ map { defined $_ ? $f->() : $_ } @{$self->{CURR_ROW}} ];
 }
@@ -132,6 +139,13 @@ sub unformatted {
   my ($self, $current) = @_;
   return $self->next_row($current, sub {$_->[4]->unformatted});
 }
+
+sub bind_columns {
+  my $self = shift;
+  $self->{BIND} = [ @_ ];
+}
+
+sub unbind_columns { delete $_[0]->{BIND} }
 
 1;
 
@@ -174,6 +188,10 @@ If true, trims leading empty columns. Trims however many empty columns that the 
 of empty columns has. E.g. if row 1 has data in columns B, C, and D, and row 2 has data in C, D, and E, then
 row 1 will shift to A, B, and C, and row 2 will shift to B, C, and D.
 
+=item BindColumns
+
+Accepts a reference to a list of references to scalars. Calls bind_columns on the list.
+
 =back
 
 =head2 sheet
@@ -207,6 +225,18 @@ next row.
 =head2 name
 
 Returns the name of the next cell of the spreadsheet.
+
+=head2 bind_columns
+
+Accepts an array of references to scalars. Binds the output of the row, unformatted, and next_row
+methods to the list of scalars if the 'current row' argument to those methods is not true.
+
+If output is bound, then a simple true value instead of a reference to an array
+is returned from those methods if there is a next row.
+
+=head2 unbind_columns
+
+Unbinds any scalars bound with bind_columns().
 
 =head2 worksheet
 
