@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -56,10 +56,11 @@ sub new {
   my $self = bless {
     # Save a reference to the parser so it doesn't disappear
     # until the object is destroyed.
-    PARSER => $tmp_p,
+    PARSER    => $tmp_p,
     NEXT_CELL => $nxt_cell,
-    SUB      => $generator,
-    TRIM     => $opts->{TrimEmpty},
+    SUB       => $generator,
+    TRIM      => $opts->{TrimEmpty},
+    NEW_WS    => 0,
   }, $class . '::Sheet';
   $self->bind_columns( @{$opts->{BindColumns}} ) if $opts->{BindColumns};
   return $self;
@@ -70,6 +71,26 @@ package Spreadsheet::ParseExcel::Stream::Sheet;
 sub sheet {
   my $self = shift;
   return unless $self->{NEXT_CELL};
+
+  # NEW_WS:
+  # undef - in the middle of a sheet.
+  # 0 - Hit end of previous sheet and fetched next row.
+  # 1 - At end of sheet but not fetched next row yet.
+  # 0 and 1 will be treated as same, just undef NEW_WS and return.
+  # If undef, advance to the next sheet.
+  if ( ! defined $self->{NEW_WS} ) {
+    # Advance to the next sheet
+    my $curr_cell = $self->{NEXT_CELL};
+    my $curr_sheet = $curr_cell->[1];
+    my $f = $self->{SUB};
+    my $nxt_cell = $f->();
+    while ( $nxt_cell && $nxt_cell->[1] == $curr_sheet ) {
+      $curr_cell = $nxt_cell;
+      $nxt_cell = $f->();
+    }
+    $self->{NEXT_CELL} = $nxt_cell;
+  }
+  $self->{NEW_WS} = undef;
   return $self;
 }
 
@@ -92,7 +113,7 @@ sub set_next_row {
   return $self->{NEW_WS} = 0 if $self->{NEW_WS};
 
   # Save original cell so we can detect change in worksheet
-  my $orig_cell = my $curr_cell = $self->{NEXT_CELL};
+  my $curr_cell = $self->{NEXT_CELL};
   my $f = $self->{SUB};
 
   # Initialize row with first cell
@@ -105,13 +126,14 @@ sub set_next_row {
   $row[ $curr_cell->[3] - $min_col ] = $curr_cell;
 
   # Collect current row on current worksheet
-  while ( $nxt_cell && $nxt_cell->[1] == $curr_cell->[1] && $nxt_cell->[2] == $curr_cell->[2] ) {
+  my ( $curr_sheet, $curr_row ) = @$curr_cell[1,2];
+  while ( $nxt_cell && $nxt_cell->[1] == $curr_sheet && $nxt_cell->[2] == $curr_row ) {
     $curr_cell = $nxt_cell;
     $row[ $curr_cell->[3] - $min_col ] = $curr_cell;
     $nxt_cell = $f->();
   }
   $self->{NEXT_CELL} = $nxt_cell;
-  $self->{NEW_WS}++ if !$nxt_cell || $orig_cell->[1] != $nxt_cell->[1];
+  $self->{NEW_WS}++ if !$nxt_cell || $curr_sheet != $nxt_cell->[1];
   $self->{CURR_ROW} = \@row;
 }
 
@@ -196,7 +218,7 @@ Accepts a reference to a list of references to scalars. Calls bind_columns on th
 
 =head2 sheet
 
-Returns the sheet of the next cell of the spreadsheet.
+Returns the next worksheet of the workbook.
 
 =head2 row
 
@@ -224,7 +246,7 @@ next row.
 
 =head2 name
 
-Returns the name of the next cell of the spreadsheet.
+Returns the name of the current worksheet.
 
 =head2 bind_columns
 
@@ -240,7 +262,7 @@ Unbinds any scalars bound with bind_columns().
 
 =head2 worksheet
 
-Returns the worksheet containing the next cell of data as a Spreadsheet::ParseExcel object.
+Returns the current worksheet as a Spreadsheet::ParseExcel object.
 
 =head1 AUTHOR
 
