@@ -1,4 +1,4 @@
-package Spreadsheet::ParseExcel::Stream;
+package Spreadsheet::ParseExcel::Stream::XLS;
 
 use strict;
 use warnings;
@@ -7,12 +7,17 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub new {
   my ($class, $file, $opts) = @_;
 
   $opts ||= {};
+  my @password;
+  if ( defined($opts->{Password}) && length($opts->{Password}) ) {
+    @password = ( Password => $opts->{Password} );
+  }
+
   my $main = Coro::State->new();
   my ($xls,$parser);
 
@@ -35,6 +40,7 @@ sub new {
   $xls = Spreadsheet::ParseExcel->new(
     CellHandler => $handler,
     NotSetCell => 1,
+    @password,
   );
 
   # Returns the next cell of the spreadsheet
@@ -61,7 +67,7 @@ sub new {
     SUB       => $generator,
     TRIM      => $opts->{TrimEmpty},
     NEW_WS    => 0,
-  }, $class . '::Sheet';
+  }, 'Spreadsheet::ParseExcel::Stream::Sheet';
   $self->bind_columns( @{$opts->{BindColumns}} ) if $opts->{BindColumns};
   return $self;
 }
@@ -175,11 +181,11 @@ __END__
 
 =head1 NAME
 
-Spreadsheet::ParseExcel::Stream - Simple interface to Excel data with no memory overhead
+Spreadsheet::ParseExcel::Stream::XLS - Simple interface to Excel data with less memory overhead
 
 =head1 SYNOPSIS
 
-  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file, \%options);
+  my $xls = Spreadsheet::ParseExcel::Stream::XLS->new($xls_file, \%options);
   while ( my $sheet = $xls->sheet() ) {
     while ( my $row = $sheet->row ) {
       my @data = @$row;
@@ -188,92 +194,11 @@ Spreadsheet::ParseExcel::Stream - Simple interface to Excel data with no memory 
 
 =head1 DESCRIPTION
 
-A simple iterative interface to L<Spreadsheet::ParseExcel>, similar to L<Spreadsheet::ParseExcel::Simple>,
-but does not parse the entire document to memory. Uses the hints provided in the L<Spreadsheet::ParseExcel>
-docs to reduce memory usage, and returns the data row by row and sheet by sheet.
-
-=head1 METHODS
-
-=head2 new
-
-  my $xls = Spreadsheet::ParseExcel::Stream->new($xls_file, \%options);
-
-Opens the spreadsheet and returns an object to iterate through the data.
-
-Accepts an optional hashref with the following keys:
-
-=over
-
-=item TrimEmpty
-
-If true, trims leading empty columns. Trims however many empty columns that the row with the minimum number
-of empty columns has. E.g. if row 1 has data in columns B, C, and D, and row 2 has data in C, D, and E, then
-row 1 will shift to A, B, and C, and row 2 will shift to B, C, and D.
-
-=item BindColumns
-
-Accepts a reference to a list of references to scalars. Calls bind_columns on the list.
-
-=back
-
-=head2 sheet
-
-Returns the next worksheet of the workbook.
-
-=head2 row
-
-Returns the next row of data from the current spreadsheet. The data is the formatted
-contents of each cell as returned by the $cell->value() method of Spreadsheet::ParseExcel.
-
-If a true argument is passed in, returns the current row of data without advancing to the
-next row.
-
-=head2 unformatted
-
-Returns the next row of data from the current spreadsheet as returned
-by the $cell->unformatted() method of Spreadsheet::ParseExcel.
-
-If a true argument is passed in, returns the current row of data without advancing to the
-next row.
-
-=head2 next_row
-
-Returns the next row of cells from the current spreadsheet as Spreadsheet::ParseExcel
-cell objects.
-
-If a true argument is passed in, returns the current row without advancing to the
-next row.
-
-=head2 name
-
-Returns the name of the current worksheet.
-
-=head2 bind_columns
-
-Accepts an array of references to scalars. Binds the output of the row, unformatted, and next_row
-methods to the list of scalars if the 'current row' argument to those methods is not true.
-
-If output is bound, then a simple true value instead of a reference to an array
-is returned from those methods if there is a next row.
-
-=head2 unbind_columns
-
-Unbinds any scalars bound with bind_columns().
-
-=head2 worksheet
-
-Returns the current worksheet as a Spreadsheet::ParseExcel object.
+See L<Spreadsheet::ParseExcel::Stream>.
 
 =head1 AUTHOR
 
 Douglas Wilson, E<lt>dougw@cpan.org<gt>
-
-=head1 BUGS AND LIMITATIONS
-
-For spreadsheets created with L<Spreadsheet::WriteExcel> without using
-C<$wb-E<gt>compatibility_mode()>, this module will read rows of a spreadsheet
-out of order if the rows were written out of order, and the TrimEmpty option of 
-this module will not work correctly.
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -282,9 +207,5 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
-=head1 SEE ALSO
-
-L<Spreadsheet::ParseExcel>, L<Spreadsheet::ParseExcel::Simple>
 
 =cut

@@ -1,5 +1,8 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.08  Wed Jul 10 20:17:55 2013
+  - Make password option available for xls files
+  - Parse xls or xlsx files.
 0.08  Thu Sep 12 19:26:38 2012
   - Ability to skip worksheets. sheet() will now advance to next sheet.
 0.07  Thu Apr 19 18:16:27 2012

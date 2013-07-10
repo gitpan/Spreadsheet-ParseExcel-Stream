@@ -13,6 +13,8 @@ t/07-skip_sheet.t
 t/test.xls
 t/test_nulls.xls
 t/test_trim.xls
-Stream.pm
+lib/Spreadsheet/ParseExcel/Stream.pm
+lib/Spreadsheet/ParseExcel/Stream/XLS.pm
+lib/Spreadsheet/ParseExcel/Stream/XLSX.pm
 META.yml                                 Module YAML meta-data (added by MakeMaker)
 META.json                                Module JSON meta-data (added by MakeMaker)
