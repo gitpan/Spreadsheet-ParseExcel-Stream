@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -91,10 +91,9 @@ sub sheet {
     my $f = $self->{SUB};
     my $nxt_cell = $f->();
     while ( $nxt_cell && $nxt_cell->[1] == $curr_sheet ) {
-      $curr_cell = $nxt_cell;
       $nxt_cell = $f->();
     }
-    $self->{NEXT_CELL} = $nxt_cell;
+    $self->{NEXT_CELL} = $nxt_cell or return;
   }
   $self->{NEW_WS} = undef;
   return $self;

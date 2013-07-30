@@ -1,6 +1,8 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
-0.08  Wed Jul 10 20:17:55 2013
+0.10  Wed Jul 30 04:51:22 2013
+  - Fix error when calling sheet() on last sheet of xls files.
+0.09  Wed Jul 10 20:17:55 2013
   - Make password option available for xls files
   - Parse xls or xlsx files.
 0.08  Thu Sep 12 19:26:38 2012
