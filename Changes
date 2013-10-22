@@ -1,5 +1,7 @@
 Revision history for Perl extension Spreadsheet::ParseExcel::Stream.
 
+0.11  Tue Oct 22 07:45:03 2013
+  - Create workbook() method to expose workbook object(rt89603).
 0.10  Wed Jul 30 04:51:22 2013
   - Fix error when calling sheet() on last sheet of xls files.
 0.09  Wed Jul 10 20:17:55 2013

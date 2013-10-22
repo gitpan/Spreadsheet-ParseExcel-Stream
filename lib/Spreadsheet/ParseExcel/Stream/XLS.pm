@@ -7,7 +7,7 @@ use Spreadsheet::ParseExcel;
 use Scalar::Util qw(weaken);
 use Coro;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -97,6 +97,12 @@ sub sheet {
   }
   $self->{NEW_WS} = undef;
   return $self;
+}
+
+sub workbook {
+  my $self = shift;
+  my $row = $self->{NEXT_CELL};
+  return $row->[0];
 }
 
 sub worksheet {

@@ -3,7 +3,7 @@ package Spreadsheet::ParseExcel::Stream;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
 
@@ -144,6 +144,10 @@ is returned from those methods if there is a next row.
 =head2 unbind_columns
 
 Unbinds any scalars bound with bind_columns().
+
+=head2 workbook
+
+Returns the workbook as a Spreadsheet::ParseExcel object.
 
 =head2 worksheet
 

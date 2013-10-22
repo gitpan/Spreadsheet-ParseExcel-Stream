@@ -20,4 +20,4 @@ no_index:
 requires:
   Coro: 0
   Spreadsheet::ParseExcel: 0
-version: 0.10
+version: 0.11

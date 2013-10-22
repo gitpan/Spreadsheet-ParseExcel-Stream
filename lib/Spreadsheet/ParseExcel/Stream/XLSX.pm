@@ -3,7 +3,7 @@ package Spreadsheet::ParseExcel::Stream::XLSX;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
   my ($class, $file, $opts) = @_;
@@ -22,6 +22,9 @@ sub new {
     ROWS   => [],
   }, $class;
 }
+
+sub workbook { $_[0]{XLS} }
+sub worksheet { $_[0]{CURR_SHEET}{SHEET} }
 
 sub sheet {
   my $self = shift;
